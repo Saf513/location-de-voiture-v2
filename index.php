@@ -5,15 +5,16 @@ require './connection/connection.php';
 $pdo = $dbConnection->getConnection();
 
 $role = isset($_GET['role']) ? $_GET['role'] : null;
+$name = isset($_GET['name']) ? $_GET['name'] : null;
+
 
 if ($role !== 'admin' && $role !== 'vendor') {
-    // Si le rôle n'est pas valide, rediriger vers la page de login
     header('Location: http://localhost:3000/authentification/login.php');
     exit;
 }
 
-// Créer une instance de la classe correspondant au rôle
-$roleClass = $role; // Cela garantit que la première lettre est en majuscule
+
+$roleClass = $role; 
 $roleInstance = new $roleClass($pdo);
 
 // Vérifier si l'utilisateur est connecté pour ce rôle
@@ -27,6 +28,7 @@ if (!$roleInstance->isLoggedIn()) {
 $user = $roleInstance->getUser();
 
 // Vous pouvez maintenant utiliser la variable $user pour afficher les informations de l'utilisateur
+
 ?>
 
 <!DOCTYPE html>
@@ -51,22 +53,22 @@ $user = $roleInstance->getUser();
                 <li><a href="./controllers/clients.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Clients</a></li>
                 <?php
                 if (isset($user)) {
-                    if ($user['role'] === 'admin') {
-                        echo '<li><a href="/view/vendor.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Vendeures</a></li>';
+                    if ($roleClass === 'admin') {
+                        echo '<li><a href="/view/vendor.php?name=' . urlencode($user['nom']) . '" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Vendeuses</a></li>';
                     }
                 }
                 ?>
 
             </ul>
             <div class="mt-auto">
-                <a href="./authentification/logout.PHP" class="block py-3 px-6 bg-red-600 text-lg rounded-lg text-center hover:bg-red-700 mt-6">Déconnexion</a>
+            <a href="./authentification/logout.php?role=<?php echo $roleClass; ?>" class="block py-3 px-6 bg-red-600 text-lg rounded-lg text-center hover:bg-red-700 mt-6">Déconnexion</a>
             </div>
         </div>
 
         <div class="flex-1 p-8 bg-gray-50">
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-semibold text-gray-800"><?php echo "welcome  {$user['nom']} " ?></h1>
-                <button class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-lg hover:bg-green-700 transition">Ajouter un client</button>
+                <h1 class="text-4xl font-semibold text-gray-800"><?php echo "welcome  {$name} " ?></h1>
+                <!-- <button class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-lg hover:bg-green-700 transition">Ajouter un client</button> -->
             </div>
 
             <p class="text-xl text-gray-600 mb-6">Gérez vos voitures, contrats et clients en un seul endroit.</p>

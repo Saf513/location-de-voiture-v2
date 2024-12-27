@@ -8,25 +8,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $stmt = $pdo->prepare("SELECT role,password FROM users WHERE email = :email");
+    $stmt = $pdo->prepare("SELECT id, role, password, nom FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    // Vérification du mot de passe
-    if($user){
-    if ($user['role']==='admin' && password_verify($password, $user['password'])) {
-       header('Location: http://localhost:3000/index.php?role=admin');
-       exit;
-      
-        } elseif ($user['role'] === 'vendor' && password_verify($password, $user['password'])) {
-            header('Location: http://localhost:3000/index.php?role=vendor');
-        
-        exit;
-    } else {
-        echo "Email ou mot de passe incorrect.";
-    }
-}}
-?>
 
+    if ($user) {
+        // Check password for validity
+        if ($user['role'] === 'admin' && password_verify($password, $user['password'])) {
+            // Redirect for admin login
+            header("Location: http://localhost:3000/index.php?role=admin&name=" . urlencode($user['nom']));
+            exit;
+        } elseif ($user['role'] === 'vendor' && password_verify($password, $user['password'])) {
+            // Redirect for vendor login
+            header("Location: http://localhost:3000/index.php?role=vendor&name=" . urlencode($user['nom']));
+            exit;
+        } else {
+            // Invalid password
+            echo "<p class='text-red-500'>Mot de passe incorrect.</p>";
+        }
+    } else {
+        // User not found
+        echo "<p class='text-red-500'>Email non trouvé.</p>";
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -70,12 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </button>
 
         <!-- Register Link -->
-      
-       <p class="text-center text-sm text-gray-600 mt-4">
-            Pas encore de compte ? <a href="../authentification//register.php" class="text-blue-600 hover:text-blue-700">Créer un compte</a>
-        </p>;
-        ?>
-
+        <p class="text-center text-sm text-gray-600 mt-4">
+            Pas encore de compte ? <a href="../authentification/register.php" class="text-blue-600 hover:text-blue-700">Créer un compte</a>
+        </p>
     </form>
 
 </body>

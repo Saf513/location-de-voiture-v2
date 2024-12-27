@@ -6,13 +6,13 @@ require '../authentification/authModel.php';
 $pdo = $dbConnection->getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $admin = new admin($pdo);
+    $vendor = new vendor($pdo);
     $name= $_POST['name'];
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $role='admin';
+    $role='vendor';
 
-    $result = $admin->register($name,$email, $password,$role);
+    $result = $vendor->register($name,$email, $password,$role);
 
     if ($result === true) {
         header('Location:http://localhost:3000/authentification/login.php');

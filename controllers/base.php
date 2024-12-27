@@ -28,12 +28,12 @@ class UserManager
             // Si l'insertion est réussie, on récupère l'ID du nouvel utilisateur
             $userId = $this->pdo->lastInsertId();
 
-            // Maintenant, on insère l'utilisateur dans la table vendors
-            $vendorStmt = $this->pdo->prepare("INSERT INTO vendors (user_id, nom) VALUES (:user_id, :nom)");
-            return $vendorStmt->execute([
-                'user_id' => $userId,
-                'nom' => $nom
-            ]);
+            // // Maintenant, on insère l'utilisateur dans la table vendors
+            // $vendorStmt = $this->pdo->prepare("INSERT INTO vendors (user_id, nom) VALUES (:user_id, :nom)");
+            // return $vendorStmt->execute([
+            //     'user_id' => $userId,
+            //     'nom' => $nom
+            // ]);
         } else {
             return false;
         }
@@ -58,16 +58,28 @@ class UserManager
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateUser($id, $email, $nom, $role)
+    public function updateUser($id, $email, $nom,$password, $role)
     {
-        $stmt = $this->pdo->prepare("UPDATE users SET email = :email, nom = :nom, role = :role WHERE id = :id");
+        $stmt = $this->pdo->prepare("UPDATE users SET email = :email, nom = :nom, password= :password ,role = :role WHERE id = :id");
         return $stmt->execute([
             'id' => $id,
             'email' => $email,
             'nom' => $nom,
+            'password'=>$password,
             'role' => $role
         ]);
     }
+
+    public function readAll() {
+        $sql = "SELECT * FROM users where role='vendor'";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
     public function deleteUser($id)
     {

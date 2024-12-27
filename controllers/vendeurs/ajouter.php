@@ -1,35 +1,46 @@
 <?php
+session_start(); // Assurez-vous que la session est démarrée
+
 require '../../connection/connection.php';  
 require '../../controllers/base.php';
 
 $pdo = $dbConnection->getConnection();
 
 $userManager = new UserManager($pdo);
-$erreurMessage='';
-$successMessage='';
+$erreurMessage = '';
+$successMessage = '';
 
-if($_SERVER['REQUEST_METHOD']==='POST'){
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
- $name=trim($_POST['name']);
- $email=trim($_POST['email']);
- $password=trim($_POST['password']);
- $role='user';
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    $role = 'vendor';
 
-
-      if(empty( $name) || empty($email) || empty($password)){
-       $erreurMessage="Tout les champs sont obligatoires";
-           }
-     
-         if ($userManager->createUser($email, $password, $name, $role)) {
-        $successMessage="le vendeur est  ajouter par succes";
-        header('Location:http://localhost:3000/view/vendor.php');
-    } else {
-        $erreurMessage="Erreur de  l'ajout de vendeur";
+    if (empty($name) || empty($email) || empty($password)) {
+        $erreurMessage = "Tous les champs sont obligatoires.";
     }
-   
+
+    if ($userManager->emailExists($email)) {
+        $erreurMessage = "L'email est déjà utilisé.";
     }
-    
+
+    // Hachage du mot de passe
+    if (empty($erreurMessage)) {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT); 
+
+        if ($userManager->createUser($email, $hashedPassword, $name, $role)) {
+            $_SESSION['successMessage'] = "Le vendeur a été ajouté avec succès."; // Stocker le message de succès dans la session
+            header('Location: ../../index.php');
+            exit; // Arrêter l'exécution après la redirection
+        } else {
+            $erreurMessage = "Erreur lors de l'ajout du vendeur.";
+        }
+    }
+}
 ?>
+
+
 
 
 
