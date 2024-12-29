@@ -1,4 +1,5 @@
 <?php
+session_start();
 require './authentification/authModel.php';
 require './connection/connection.php';
 
@@ -7,30 +8,29 @@ $pdo = $dbConnection->getConnection();
 $role = isset($_GET['role']) ? $_GET['role'] : null;
 $name = isset($_GET['name']) ? $_GET['name'] : null;
 
-
 if ($role !== 'admin' && $role !== 'vendor') {
-    header('Location: http://localhost:3000/authentification/login.php');
+    header('Location: http://localhost:3000/authentification/login.php?error=invalid_role');
     exit;
 }
-
-
+$isTrue=true;
 $roleClass = $role; 
 $roleInstance = new $roleClass($pdo);
 
 // Vérifier si l'utilisateur est connecté pour ce rôle
 if (!$roleInstance->isLoggedIn()) {
     // Si l'utilisateur n'est pas connecté, rediriger vers la page de login
-    header('Location: http://localhost:3000/authentification/login.php');
+    header('Location: http://localhost:3000/authentification/login.php?error=session_expired');
     exit;
 }
 
 // Récupérer les informations de l'utilisateur connecté
 $user = $roleInstance->getUser();
 
+// Sécuriser l'affichage des données utilisateur
+$name = htmlspecialchars($name);
+
 // Vous pouvez maintenant utiliser la variable $user pour afficher les informations de l'utilisateur
-
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -39,6 +39,7 @@ $user = $roleInstance->getUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Location de Voitures</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com">
 </head>
 
 <body class="bg-gray-100 font-sans">
@@ -48,7 +49,7 @@ $user = $roleInstance->getUser();
             <h2 class="text-3xl font-bold mb-8 text-center">Admin Dashboard</h2>
             <ul class="space-y-6">
                 <li><a href="./index.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Home</a></li>
-                <li><a href="./controllers/voiture.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Voitures</a></li>
+                <li><a href="/view/voiture.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Voitures</a></li>
                 <li><a href="./controllers//voiture.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Contrats</a></li>
                 <li><a href="./controllers/clients.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Clients</a></li>
                 <?php

@@ -182,6 +182,43 @@ abstract class abstractCrud
 class VoitureCRUD extends AbstractCRUD {
     public function __construct($pdo) {
         parent::__construct($pdo, "voitures"); 
+
+    }
+
+    public function delete($NumImmatriculation) {
+
+        // Assurez-vous que NumImmatriculation est bien défini et valide
+        if (empty($NumImmatriculation)) {
+            echo "Numéro d'immatriculation manquant.";
+            return false;
+        }
+    
+        // Préparer la requête DELETE
+        $sql = "DELETE FROM {$this->table} WHERE NumImmatriculation = :NumImmatriculation";
+     
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            
+            // Exécuter la requête et vérifier si la suppression a réussi
+            $result = $stmt->execute(['NumImmatriculation' => $NumImmatriculation]);
+    
+            if ($result) {
+                return true;  // Suppression réussie
+            } else {
+                echo "Erreur : La suppression a échoué.";
+                return false;
+            }
+        } catch (PDOException $e) {
+            // Afficher l'erreur si la préparation ou l'exécution échoue
+            echo "Erreur SQL : " . $e->getMessage();
+            return false;
+        }
+    }
+    public function getByNumImmatriculation($NumImmatriculation) {
+        $sql = "SELECT * FROM {$this->table} WHERE NumImmatriculation = :NumImmatriculation";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['NumImmatriculation' => $NumImmatriculation]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
 
