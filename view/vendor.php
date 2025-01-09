@@ -3,7 +3,7 @@ require '../authentification/authModel.php';
 require '../connection/connection.php';
 require '../controllers/base.php';
 $pdo = $dbConnection->getConnection();
-$userManager = new UserManager($pdo);
+$admin = new admin($pdo);
 $name = isset($_GET['name']) ? $_GET['name'] : null;
 
 
@@ -12,7 +12,7 @@ $name = isset($_GET['name']) ? $_GET['name'] : null;
 //     exit;
 // }
 // $user = $admin->getUser();
-$vendors = $userManager->readAll();
+$vendors = $admin->readAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
