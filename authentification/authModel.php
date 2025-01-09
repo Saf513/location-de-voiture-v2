@@ -7,12 +7,10 @@
     public function __construct($pdo)
     {
        
-
         $this->pdo = $pdo;
     }
 
     public function login($email, $password)
-
     {
         
         if (empty($email) || empty($password)) {
@@ -39,7 +37,6 @@
 
     public function logout()
     {
-        // Détruire la session et supprimer le cookie
         unset($_SESSION[$this->sessionName]);
 
         if (isset($_COOKIE['user_id'])) {
@@ -51,20 +48,15 @@
 
     public function isLoggedIn()
     {
-        // Vérification de la session
         if (isset($_SESSION[$this->sessionName])) {
-           
             return true;
         }
 
-        // Vérification du cookie "remember me"
         if (isset($_COOKIE['user_id'])) {
           
-            // Vérifier l'existence de l'utilisateur avec l'ID du cookie
             $stmt = $this->pdo->prepare('SELECT * FROM users WHERE id = :id');
             $stmt->execute(['id' => $_COOKIE['user_id']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            // Si l'utilisateur existe, on recrée la session
             if ($user) {
                 $_SESSION[$this->sessionName] = $user['id'];
                 return true;
@@ -76,7 +68,6 @@
 
     public function getUser()
     {
-        // Retourner les informations de l'utilisateur si connecté
         if ($this->isLoggedIn()) {
             $stmt = $this->pdo->prepare('SELECT * FROM users WHERE id = :id');
             $stmt->execute(['id' => $_SESSION[$this->sessionName]]);
@@ -87,7 +78,6 @@
 
     public function emailExists($email)
     {
-        // Vérifier si l'email existe déjà dans la base de données
         $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
         $stmt->execute([$email]);
         return $stmt->fetchColumn() > 0;
@@ -100,6 +90,86 @@ class Admin extends Auth
     {
         $stmt = $this->pdo->prepare("UPDATE vendors SET approved = 1 WHERE id = :vendorId");
         $stmt->execute(['vendorId' => $vendorId]);
+    }
+
+    public function createUser($email, $password, $nom, $role = 'vendor') 
+    {
+       
+        if (!in_array($role, ['admin', 'vendor'])) {
+            throw new Exception("Role invalide");
+        }
+
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $this->pdo->prepare("INSERT INTO users (email, password, nom, role) VALUES (:email, :password, :nom, :role)");
+
+        if ($stmt->execute([
+            'email' => $email,
+            'password' => $hashedPassword,
+            'nom' => $nom,
+            'role' => $role 
+        ])) {
+            
+            $userId = $this->pdo->lastInsertId();
+
+            // // Maintenant, on insère l'utilisateur dans la table vendors
+            // $vendorStmt = $this->pdo->prepare("INSERT INTO vendors (user_id, nom) VALUES (:user_id, :nom)");
+            // return $vendorStmt->execute([
+            //     'user_id' => $userId,
+            //     'nom' => $nom
+            // ]);
+        } else {
+            return false;
+        }
+    }
+    public function getUserById($id)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getUserByEmail($email)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateUser($id, $email, $nom,$password, $role)
+    {
+        $stmt = $this->pdo->prepare("UPDATE users SET email = :email, nom = :nom, password= :password ,role = :role WHERE id = :id");
+        return $stmt->execute([
+            'id' => $id,
+            'email' => $email,
+            'nom' => $nom,
+            'password'=>$password,
+            'role' => $role
+        ]);
+    }
+
+    public function readAll() {
+        $sql = "SELECT * FROM users where role='vendor'";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function deleteUser($id)
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
+        return $stmt->execute(['id' => $id]);
+    }
+
+    public function emailExists($email)
+    {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetchColumn() > 0;
     }
 
 }

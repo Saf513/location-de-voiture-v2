@@ -1,17 +1,16 @@
 <?php
 require_once '../../connection/connection.php';
-require_once '../../controllers/base.php';
+require_once '../../authentification/authModel.php';
 
-$pdo = $dbConnection->getConnection();
 
-$userManager = new UserManager($pdo);
+$admin = new Admin($pdo);
 $erreurMessage = '';
 $successMessage = '';
 
 $id= isset($_GET['id']) ? $_GET['id'] : null;
 if($id !== null){
 
-    $userManager->deleteUser($id);
+    $admin->deleteUser($id);
     header('Location: http://localhost:3000/view/vendor.php');
 }
 

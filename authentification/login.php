@@ -3,12 +3,11 @@ session_start();
 require_once '../connection/connection.php';
 require_once 'authModel.php';
 
-$pdo = $dbConnection->getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password'])) {
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
-//    empty a ajouter
+    
     $stmt = $pdo->prepare("SELECT id, role, password, nom FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);

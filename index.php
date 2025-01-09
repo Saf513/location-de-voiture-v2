@@ -3,9 +3,6 @@ session_start();
 require './authentification/authModel.php';
 require './connection/connection.php';
 
-$pdo = $dbConnection->getConnection();
-
-// Récupérer et nettoyer les paramètres GET
 $role = isset($_GET['role']) ? htmlspecialchars(trim($_GET['role'])) : null;
 $name = isset($_GET['name']) ? htmlspecialchars(trim($_GET['name'])) : null;
 
@@ -68,7 +65,7 @@ try {
                 <li><a href="./controllers/clients.php" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Clients</a></li>
                 <?php
                 if (isset($user)) {
-                    if ($roleClass === 'admin') {
+                    if ($role === 'admin') {
                         echo '<li><a href="/view/vendor.php?name=' . urlencode($user['nom']) . '" class="block py-3 px-6 text-xl rounded-lg hover:bg-gray-700">Vendeuses</a></li>';
                     }
                 }

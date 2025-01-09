@@ -2,9 +2,6 @@
 require '../connection/connection.php';
 require '../authentification/authModel.php';
 
-
-$pdo = $dbConnection->getConnection();
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $vendor = new vendor($pdo);
     $name= $_POST['name'];

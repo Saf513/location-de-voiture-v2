@@ -8,37 +8,7 @@ class UserManager
         $this->pdo = $pdo;
     }
 
-    public function createUser($email, $password, $nom, $role = 'vendor') // 'vendor' par défaut
-    {
-        // Vérifiez ici que le rôle est bien dans les valeurs autorisées
-        if (!in_array($role, ['admin', 'vendor'])) {
-            throw new Exception("Role invalide");
-        }
-
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-        $stmt = $this->pdo->prepare("INSERT INTO users (email, password, nom, role) VALUES (:email, :password, :nom, :role)");
-
-        if ($stmt->execute([
-            'email' => $email,
-            'password' => $hashedPassword,
-            'nom' => $nom,
-            'role' => $role // Assurez-vous que ce rôle soit 'admin' ou 'vendor'
-        ])) {
-            // Si l'insertion est réussie, on récupère l'ID du nouvel utilisateur
-            $userId = $this->pdo->lastInsertId();
-
-            // // Maintenant, on insère l'utilisateur dans la table vendors
-            // $vendorStmt = $this->pdo->prepare("INSERT INTO vendors (user_id, nom) VALUES (:user_id, :nom)");
-            // return $vendorStmt->execute([
-            //     'user_id' => $userId,
-            //     'nom' => $nom
-            // ]);
-        } else {
-            return false;
-        }
-    }
-
+    
     // Autres méthodes de gestion des utilisateurs...
 
 
