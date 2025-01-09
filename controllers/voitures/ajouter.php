@@ -11,9 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $marque = $_POST['marque'];
     $annee = $_POST['annee'];
     
-
-    // Créer une instance de VoitureCRUD pour insérer la voiture
-    $pdo = $dbConnection->getConnection(); // Connexion PDO à la base de données
     $voitureCRUD = new VoitureCRUD($pdo); // Création d'une instance de VoitureCRUD
 
     // Tableau des données à insérer

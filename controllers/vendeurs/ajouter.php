@@ -1,12 +1,12 @@
 <?php
-session_start(); // Assurez-vous que la session est démarrée
+session_start(); 
 
 require '../../connection/connection.php';  
-require '../../controllers/base.php';
+require '../../authentification/authModel.php';
 
 $pdo = $dbConnection->getConnection();
 
-$userManager = new UserManager($pdo);
+$admin = new admin($pdo);
 $erreurMessage = '';
 $successMessage = '';
 
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erreurMessage = "Tous les champs sont obligatoires.";
     }
 
-    if ($userManager->emailExists($email)) {
+    if ($admin->emailExists($email)) {
         $erreurMessage = "L'email est déjà utilisé.";
     }
 
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($erreurMessage)) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT); 
 
-        if ($userManager->createUser($email, $hashedPassword, $name, $role)) {
+        if ($admin->createUser($email, $hashedPassword, $name, $role)) {
             $_SESSION['successMessage'] = "Le vendeur a été ajouté avec succès."; // Stocker le message de succès dans la session
             header('Location: ../../index.php');
             exit; // Arrêter l'exécution après la redirection

@@ -1,9 +1,8 @@
 <?php
 require_once '../../connection/connection.php';
-require_once '../../controllers/base.php';
+require_once '../../authentification/authModel.php';
 
-$pdo = $dbConnection->getConnection();
-$userManager = new UserManager($pdo);
+$admin = new Admin($pdo);
 $erreurMessage = '';
 $successMessage = '';
 
@@ -11,7 +10,7 @@ $id = isset($_GET['id']) ? $_GET['id'] : null;
 
 if ($id !== null) {
     // Récupérer les informations de l'utilisateur existant
-    $vendor = $userManager->getUserById($id);
+    $vendor = $admin->getUserById($id);
 
     // Vérifier si un formulaire POST a été soumis
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,7 +31,7 @@ if ($id !== null) {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
             // Appel à la méthode de mise à jour, en incluant l'ID de l'utilisateur
-            if ($userManager->updateUser($id, $email, $name, $hashedPassword, $role)) {
+            if ($admin->updateUser($id, $email, $name, $hashedPassword, $role)) {
                 $successMessage = "Les informations du vendeur ont été mises à jour avec succès.";
                 // Redirection vers la page d'accueil ou la liste des vendeurs
                 header('Location: http://localhost:3000/view/vendor.php');
