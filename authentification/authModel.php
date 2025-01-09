@@ -6,13 +6,15 @@
 
     public function __construct($pdo)
     {
-        session_start();
+       
 
         $this->pdo = $pdo;
     }
 
     public function login($email, $password)
+
     {
+        
         if (empty($email) || empty($password)) {
             return "L'email ou le mot de passe ne peut pas être vide.";
         }
@@ -22,6 +24,7 @@
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
+            
             $_SESSION[$this->sessionName] = $user['id'];
 
             if (isset($_POST['remember'])) {

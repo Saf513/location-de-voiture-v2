@@ -1,35 +1,42 @@
 <?php
+session_start();
 require_once '../connection/connection.php';
 require_once 'authModel.php';
 
 $pdo = $dbConnection->getConnection();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password'])) {
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+//    empty a ajouter
     $stmt = $pdo->prepare("SELECT id, role, password, nom FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
 
     if ($user) {
-        // Check password for validity
-        if ($user['role'] === 'admin' && password_verify($password, $user['password'])) {
-            // Redirect for admin login
-            header("Location: http://localhost:3000/index.php?role=admin&name=" . urlencode($user['nom']));
-            exit;
-        } elseif ($user['role'] === 'vendor' && password_verify($password, $user['password'])) {
-            // Redirect for vendor login
-            header("Location: http://localhost:3000/index.php?role=vendor&name=" . urlencode($user['nom']));
-            exit;
+        if (password_verify($password, $user['password'])) {
+            if ($user['role'] === 'admin') {
+                $admin = new Admin($pdo);
+                $admin->login($email,$password);
+                header("Location: http://localhost:3000/index.php?role=admin&name=" . urlencode($user['nom']));
+                exit;
+            } elseif ($user['role'] === 'vendor') {
+                $vendor = new vendor($pdo);
+                $vendor->login($email,$password);
+                header("Location: http://localhost:3000/index.php?role=vendor&name=" . urlencode($user['nom']));
+                exit;
+            } else {
+                echo "<p class='text-red-500'>Rôle utilisateur non reconnu.</p>";
+            }
         } else {
-            // Invalid password
             echo "<p class='text-red-500'>Mot de passe incorrect.</p>";
         }
     } else {
-        // User not found
         echo "<p class='text-red-500'>Email non trouvé.</p>";
     }
+} else {
+    echo "<p class='text-red-500'>Veuillez remplir tous les champs.</p>";
 }
 ?>
 
