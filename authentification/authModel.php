@@ -1,7 +1,6 @@
 <?php
  class Auth
 {
-    
     protected $pdo;
     protected $sessionName = 'user_session';
 

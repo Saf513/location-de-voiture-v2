@@ -1,7 +1,5 @@
 <?php
-
-// ob_start();
-// session_start();
+session_start();
 require_once '../connection/connection.php';
 require_once 'authModel.php';
 

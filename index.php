@@ -5,32 +5,46 @@ require './connection/connection.php';
 
 $pdo = $dbConnection->getConnection();
 
-$role = isset($_GET['role']) ? $_GET['role'] : null;
-$name = isset($_GET['name']) ? $_GET['name'] : null;
+// Récupérer et nettoyer les paramètres GET
+$role = isset($_GET['role']) ? htmlspecialchars(trim($_GET['role'])) : null;
+$name = isset($_GET['name']) ? htmlspecialchars(trim($_GET['name'])) : null;
 
-if ($role !== 'admin' && $role !== 'vendor') {
+// Valider le rôle
+$allowedRoles = ['admin', 'vendor'];
+if ($role === null || !in_array($role, $allowedRoles)) {
     header('Location: http://localhost:3000/authentification/login.php?error=invalid_role');
     exit;
 }
-$isTrue=true;
-$roleClass = $role; 
-$roleInstance = new $roleClass($pdo);
 
-// Vérifier si l'utilisateur est connecté pour ce rôle
-if (!$roleInstance->isLoggedIn()) {
-    // Si l'utilisateur n'est pas connecté, rediriger vers la page de login
-    header('Location: http://localhost:3000/authentification/login.php?error=session_expired');
+// Valider et instancier la classe correspondante
+$roleClass = ucfirst($role);
+if (!class_exists($roleClass)) {
+    header('Location: http://localhost:3000/authentification/login.php?error=class_not_found');
     exit;
 }
 
-// Récupérer les informations de l'utilisateur connecté
-$user = $roleInstance->getUser();
+try {
+    // Instancier la classe pour le rôle
+    $roleInstance = new $roleClass($pdo);
 
-// Sécuriser l'affichage des données utilisateur
-$name = htmlspecialchars($name);
+    // Vérifier si l'utilisateur est connecté
+    if (!$roleInstance->isLoggedIn()) {
+        header('Location: http://localhost:3000/authentification/login.php?error=session_expired');
+        exit;
+    }
 
-// Vous pouvez maintenant utiliser la variable $user pour afficher les informations de l'utilisateur
+    // Récupérer les informations de l'utilisateur connecté
+    $user = $roleInstance->getUser();
+
+ 
+} catch (Exception $e) {
+    // Gérer les exceptions
+    error_log($e->getMessage());
+    header('Location: http://localhost:3000/authentification/login.php?error=unexpected_error');
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 
